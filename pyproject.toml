@@ -1,0 +1,10 @@
+[project]
+name = "ai-ops-code-along-christoffer-carlsson-de25"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "ipykernel>=7.4.0",
+    "pydantic-ai>=2.63.0",
+]
