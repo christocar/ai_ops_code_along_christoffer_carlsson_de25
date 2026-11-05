@@ -1,25 +1,30 @@
 from agents import movie_agent
-from data_models import Genre, Movie
 from fastapi import FastAPI
 from setup_db import query_duckdb
+from data_models import Prompt
 
 app = FastAPI()
 
 
-# genre is optional -> /movies returns all, /movies?genre=action filters
 @app.get("/movies")
-async def read_movies(genre: Genre | None = None) -> list[Movie]:
-    if genre:
-        df = query_duckdb("SELECT * FROM movies WHERE genre = ?", parameters=[genre])
-    else:
-        df = query_duckdb("SELECT * FROM movies")
+async def read_movies(genre: str | None = None):
 
-    return df.to_dict(orient="records")
+    if genre:
+        sql = "SELECT * FROM movies WHERE genre = ?;"
+        params = [genre]
+    if genre == "all" or not genre: 
+        sql = "FROM movies;"
+        params = None
+
+
+    movies = query_duckdb(sql, parameters=params)
+    return movies.to_dict(orient="records")
 
 
 @app.post("/movie")
-async def create_movie(query: str) -> Movie:
-    result = await movie_agent.run(query)
+async def create_movie(query: Prompt):
+    result = await movie_agent.run(query.prompt)
+
     movie = result.output
 
     query_duckdb(

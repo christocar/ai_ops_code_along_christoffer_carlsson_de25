@@ -1,32 +1,26 @@
-import httpx
-import pandas as pd
+import requests
 import streamlit as st
-from data_models import GENRES
+import pandas as pd
+# from api import create_movie, read_movies -> tightly coupled
 
-API_URL = "http://127.0.0.1:8000"
 
-st.title("Movie finder")
+def layout():
+    st.markdown("# Cool Movies")
 
-# ask a question -> POST /movie -> agent finds movie and api saves it to db
-query = st.text_input("Describe a movie or write a famous quote")
+    movie_string = st.text_input("Give a statement and it will give backa movie")
 
-if st.button("Find and save movie") and query:
-    with st.spinner("Asking the agent..."):
-        # llm calls can be slow, default timeout of 5s is too short
-        response = httpx.post(f"{API_URL}/movie", params={"query": query}, timeout=60)
+    if movie_string:
+        movie = requests.post("http://127.0.0.1:8000/movie", json={"prompt": movie_string}).json()
+        st.write(movie)
 
-    if response.status_code == 200:
-        movie = response.json()
-        st.success(f"Saved: {movie['title']} ({movie['year']})")
-        st.json(movie)
-    else:
-        st.error(f"Something went wrong: {response.text}")
+    genre = st.selectbox(
+        "Choose genre", options=["all","action", "comedy", "cartoon", "adventure", "romance"]
+    )
 
-# filter on genre -> GET /movies?genre=...
-st.header("Saved movies")
-genre = st.selectbox("Filter on genre", ["all"] + GENRES)
+    movies = requests.get(f"http://127.0.0.1:8000/movies?genre={genre}").json()
 
-params = {} if genre == "all" else {"genre": genre}
-movies = httpx.get(f"{API_URL}/movies", params=params).json()
+    st.dataframe(movies)
 
-st.dataframe(pd.DataFrame(movies), hide_index=True)
+
+if __name__ == "__main__":
+    layout()

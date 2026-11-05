@@ -1,14 +1,11 @@
 from pydantic import BaseModel, Field
-from typing import Literal, get_args
-
-Genre = Literal["action", "comedy", "romance", "cartoon", "adventure"]
-GENRES = list(get_args(Genre))
+from typing import Literal
 
 
 class Movie(BaseModel):
     title: str = Field(description="Title of movie")
     year: int = Field(description="Year when this movie came out")
-    genre: Genre = Field(
+    genre: Literal["action", "comedy", "romance", "cartoon", "adventure"] = Field(
         description="main genre, if there is more than one, choose the one that is most characteristic for the movie"
     )
     rating: int = Field(
@@ -21,3 +18,6 @@ class Movie(BaseModel):
     summary: str = Field(
         description="short exciting summary of the movie, max 3 sentences"
     )
+
+class Prompt(BaseModel):
+    prompt: str

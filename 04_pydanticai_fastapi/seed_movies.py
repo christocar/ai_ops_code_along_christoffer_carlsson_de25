@@ -24,7 +24,7 @@ queries = [
 # api must be running: uv run uvicorn api:app --reload
 for query in queries:
     try:
-        response = httpx.post(f"{API_URL}/movie", params={"query": query}, timeout=90)
+        response = httpx.post(f"{API_URL}/movie", json={"prompt": query}, timeout=90)
         response.raise_for_status()
         movie = response.json()
         print(f"saved: {movie['title']} ({movie['year']}) - {movie['genre']}")
